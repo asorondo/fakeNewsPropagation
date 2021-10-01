@@ -16,13 +16,13 @@
 #include "except.h"     // class InvalidMessageException
 #include <random>
 
-#define ATOMIC_MODEL_NAME "FakeNewsGenerator"
+#define GEN_MODEL_NAME "FakeNewsGenerator"
 
 /** declarations **/
 class FakeNewsGenerator : public Atomic
 {
 public:
-	FakeNewsGenerator( const std::string &name = ATOMIC_MODEL_NAME );				  // Default constructor
+	FakeNewsGenerator( const std::string &name = GEN_MODEL_NAME );				  // Default constructor
 
 	virtual std::string className() const
 		{return "FakeNewsGenerator";}
