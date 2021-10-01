@@ -6,37 +6,44 @@
 #include "VTime.h"
 
 
-#define ATOMIC_MODEL_NAME "OfficialMediaType"
+#define ATOMIC_MODEL_NAME "Population"
 
-class networkDelayType: public Atomic{
+class Population: public Atomic{
 	public:
-		OfficialMediaType( const string &name = ATOMIC_MODEL_NAME ) ;	 // Default constructor
-		~OfficialMediaType();					// Destructor
+		Population( const std::string &name = ATOMIC_MODEL_NAME ) ;	 
+
 		virtual string className() const {return ATOMIC_MODEL_NAME ;}
 	
 	protected:
 		Model &initFunction();	
+
 		Model &externalFunction( const ExternalMessage & );
+		
 		Model &internalFunction( const InternalMessage & );
+
 		Model &outputFunction( const CollectMessage & );
 	
 	private:
 		 const Port &in;	
-		 Port &out ;   	// this is an output port named 'out'
+		 Port &out ;   
+
+		Real age;
+		Real university_studies;
+		Real political_involvement;
+		Real employment_status;		
+		Real economic_status;
+		Real centrality;
+		Real political_affinity;
 	
 		VTime sigma;
-		
 		// Time elapsed since the last state transition until now
 		VTime elapsed;
-		
 		// Time remaining to complete the last programmed Lifetime
 		VTime timeLeft;	
-	
-		int delay;
-	
-		typedef list<Value> ElementList ;
-		ElementList elements ;
-};	// class networkDelayType
+
+		Real beliefInFakeFromPopulation(Tuple<Real>);
+		Real beliefInFakeFromMedia(Tuple<Real>);
+};	
 
 
-#endif   //__networkDelayType_H 
+#endif 
