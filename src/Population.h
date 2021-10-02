@@ -6,13 +6,13 @@
 #include "VTime.h"
 
 
-#define ATOMIC_MODEL_NAME "Population"
+#define POP_MODEL_NAME "Population"
 
 class Population: public Atomic{
 	public:
-		Population( const std::string &name = ATOMIC_MODEL_NAME ) ;	 
+		Population( const std::string &name = POP_MODEL_NAME ) ;	 
 
-		virtual string className() const {return ATOMIC_MODEL_NAME ;}
+		virtual string className() const {return POP_MODEL_NAME ;}
 	
 	protected:
 		Model &initFunction();	

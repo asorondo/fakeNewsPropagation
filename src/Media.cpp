@@ -106,7 +106,7 @@ Model &Media::internalFunction( const InternalMessage &msg )
 ********************************************************************/
 Model &Media::outputFunction( const CollectMessage &msg )
 {
-	Tuple<Real> out_value{attacked_party, urgency, credibility};
+	Tuple<Real> out_value{attacked_party, urgency, credibility, party};
 	sendOutput( msg.time(), out, out_value ) ;
 	return *this ;
 }
