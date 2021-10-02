@@ -121,9 +121,6 @@ Model &Population::internalFunction( const InternalMessage &msg )
 #if VERBOSE
 	PRINT_TIMES("dint");
 #endif
-	
-	//aca se deberia llamar a la outputFunction no?
-
 	this->sigma = VTime::Inf; // stays in passive state until an external event occurs;
 	holdIn( AtomicState::passive, this->sigma );
 	return *this;
@@ -159,7 +156,7 @@ Real Population::beliefInFakeFromMedia( Tuple<Real> message )
 		Real attacked_party = message[0];
 		Real urgency = message[1];
 		Real credibility = message[2];
-		Real media_party = message[3]; // agregar
+		Real media_party = message[3];
 
 		Real belief =    (1 - abs(media_party - political_affinity)) * 0.125   + // cuanto mas valga abs es que mas diferencia de afinidades hay - > menos va a creer
 					(1 - university_studies) * 0.125 +
@@ -179,7 +176,7 @@ Real Population::beliefInFakeFromPopulation( Tuple<Real> message )
 		Real attacked_party = message[0];
 		Real urgency = message[1];
 		Real credibility = message[2];
-		Real media_party = message[3]; // agregar
+		Real media_party = message[3]; 
 
 		Real sender_age = message[4];
 		Real sender_university_studies = message[5];

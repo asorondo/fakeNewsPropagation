@@ -6,13 +6,12 @@
 #include "VTime.h"
 
 
-#define ATOMIC_MODEL_NAME "SocialNetworksType"
+#define SOCIALNET_MODEL_NAME "SocialNetworks"
 
-class SocialNetworksType: public Atomic{
+class SocialNetworks: public Atomic{
 	public:
-		SocialNetworksType( const string &name = ATOMIC_MODEL_NAME ) ;	 // Default constructor
-		~SocialNetworksType();					// Destructor
-		virtual string className() const {return ATOMIC_MODEL_NAME ;}
+		SocialNetworks( const string &name = SOCIALNET_MODEL_NAME ) ;	 
+		virtual string className() const {return SOCIALNET_MODEL_NAME ;}
 	
 	protected:
 		Model &initFunction();	
@@ -23,6 +22,8 @@ class SocialNetworksType: public Atomic{
 	private:
 		 const Port &in;	
 		 Port &out ;   	// this is an output port named 'out'
+
+		Tuple<Real> message;
 	
 		VTime sigma;
 		
@@ -31,9 +32,6 @@ class SocialNetworksType: public Atomic{
 		
 		// Time remaining to complete the last programmed Lifetime
 		VTime timeLeft;	
-	
-		typedef list<Value> ElementList ;
-		ElementList elements ;
 };
 
 
