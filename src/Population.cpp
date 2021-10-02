@@ -190,11 +190,11 @@ Real Population::beliefInFakeFromPopulation( Tuple<Real> message )
 		Real sender_fake_belief = message[10];
 		Real sender_political_affinity = message[11];
 
-		Real shared_traits_proportion = (abs(age - sender_age) + 
+		Real shared_traits_proportion = 1 - ((abs(age - sender_age) + 
 										abs(university_studies - sender_university_studies) + 
 										abs(political_involvement - sender_political_involvement) +
 										abs(employment_status - employment_status) +
-										abs(economic_status - sender_economic_status)) / 5; // dividi por 5 porque cada termino puede valer entre 0 y 1
+										abs(economic_status - sender_economic_status)) / 5); // dividi por 5 porque cada termino puede valer entre 0 y 1
 
 		Real belief =   sender_fake_belief * 0.25 +
 						shared_traits_proportion * 0.25 +
