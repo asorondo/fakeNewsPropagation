@@ -30,6 +30,7 @@ Population::Population( const string &name ) :
 	Atomic( name ),
 	out(addOutputPort( "out" )),
 	in(addInputPort( "in" )),
+	id(500), //asumimos que no vamos a tener mas de 500 poblaciones? 
 	age(100),
 	university_studies(1),
 	political_involvement(1),
@@ -43,7 +44,7 @@ Population::Population( const string &name ) :
 	current_fake_credibility(1),
 	current_fake_media_party(1)
 {
-
+	id = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "id" ) );
 	age = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "age" ) );
 	university_studies = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "university_studies" ) );
 	political_involvement = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "political_involvement" ) );
@@ -76,40 +77,39 @@ Model &Population::externalFunction( const ExternalMessage &msg )
  	this->timeLeft = this->sigma - this->elapsed; 
 		
 	Tuple<Real> message = Tuple<Real>::from_value(msg.value());
-	Real attacked_party = message[0];
-	Real fake_belief;
 
-	current_fake_attacked_party = message[0];
-	current_fake_urgency = message[1];
-	current_fake_credibility = message[2];
-	current_fake_media_party = message[3];
+	if (message.size() > 4 && message[4] == id) { // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
 
-	if(message.size() == 4) { //message received from media
+		holdIn( AtomicState::passive, this->sigma );
 
-		fake_belief = this.beliefInFakeFromMedia(message);
+	} else {
 
-	} else { //message received from other population
+		Real attacked_party = message[0];
+		current_fake_attacked_party = message[0];
+		current_fake_urgency = message[1];
+		current_fake_credibility = message[2];
+		current_fake_media_party = message[3];
 
-		fake_belief = this.beliefInFakeFromPopulation(message);
-	}
+		Real fake_belief = message.size() == 4 ? this.beliefInFakeFromMedia(message) : this.beliefInFakeFromPopulation(message);
 
-	int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
-	political_affinity = political_affinity + multiplicative_factor * fake_belief * 0.1; // con el 0.1 nos acercamos de a poco 
+		int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
+		political_affinity = political_affinity + multiplicative_factor * fake_belief * 0.1; // con el 0.1 nos acercamos de a poco 
 
-	if (political_affinity > 1) {
-		political_affinity = 1;
-	} else if (political_affinity < 0) {
-		political_affinity = 0;
-	}
+		if (political_affinity > 1) {
+			political_affinity = 1;
+		} else if (political_affinity < 0) {
+			political_affinity = 0;
+		}
 
-	if(message.size() == 4) { //mismo if dos veces horror
+		if(message.size() == 4) {
 
-		// Generamos una transición interna para enviar el mensaje a las redes
-		holdIn( AtomicState::active, VTime::Zero );
+			// Generamos una transición interna para enviar el mensaje a las redes
+			holdIn( AtomicState::active, VTime::Zero );
 
-	} else { //message received from other population
+		} else { //message received from other population
 
-		holdIn( AtomicState::passive, this->sigma ); // Si no hay que volver a enviar nada hasta la proxima fake pasivamos
+			holdIn( AtomicState::passive, this->sigma ); // Si no hay que volver a enviar nada hasta la proxima fake pasivamos
+		}
 	}
 
 	return *this ;
@@ -137,6 +137,7 @@ Model &Population::outputFunction( const CollectMessage &msg )
 							current_fake_urgency,
 							current_fake_credibility,
 							current_fake_media_party,
+							id,
 							age,
 							university_studies,
 							political_involvement,
@@ -178,14 +179,15 @@ Real Population::beliefInFakeFromPopulation( Tuple<Real> message )
 		Real credibility = message[2];
 		Real media_party = message[3]; 
 
-		Real sender_age = message[4];
-		Real sender_university_studies = message[5];
-		Real sender_political_involvement = message[6];
-		Real sender_employment_status = message[7];
-		Real sender_economic_status = message[8];
-		Real sender_centrality = message[9];
-		Real sender_fake_belief = message[10];
-		Real sender_political_affinity = message[11];
+		//message[4] es el sender_id
+		Real sender_age = message[5];
+		Real sender_university_studies = message[6];
+		Real sender_political_involvement = message[7];
+		Real sender_employment_status = message[8];
+		Real sender_economic_status = message[9];
+		Real sender_centrality = message[10];
+		Real sender_fake_belief = message[11];
+		Real sender_political_affinity = message[12];
 
 		Real shared_traits_proportion = 1 - ((abs(age - sender_age) + 
 										abs(university_studies - sender_university_studies) + 
