@@ -84,7 +84,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 	current_fake_credibility = message[2];
 	current_fake_media_party = message[3];
 
-	if(message.size() == 3) { //message received from media
+	if(message.size() == 4) { //message received from media
 
 		fake_belief = this.beliefInFakeFromMedia(message);
 
@@ -102,7 +102,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		political_affinity = 0;
 	}
 
-	if(message.size() == 3) { //mismo if dos veces horror
+	if(message.size() == 4) { //mismo if dos veces horror
 
 		// Generamos una transición interna para enviar el mensaje a las redes
 		holdIn( AtomicState::active, VTime::Zero );
