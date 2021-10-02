@@ -8,7 +8,7 @@
 #include "real.h"
 #include "tuple_value.h"
 
-#include "SocialNetworks.h"           
+#include "CoupledPopulation.h"           
 
 using namespace std;
 
@@ -24,7 +24,7 @@ using namespace std;
 		" - sigma: " << sigma << endl;\
 }
 
-SocialNetworks::SocialNetworks( const string &name ) : 
+CoupledPopulation::CoupledPopulation( const string &name ) : 
 	Atomic( name ),
 	out(addOutputPort( "out" )),
 	in(addInputPort( "in" ))
@@ -32,7 +32,7 @@ SocialNetworks::SocialNetworks( const string &name ) :
 	message;
 }
 
-Model &SocialNetworks::initFunction()
+Model &CoupledPopulation::initFunction()
 {
 	// [(!) Initialize common variables]
 	this->elapsed  = VTime::Zero;
@@ -44,7 +44,7 @@ Model &SocialNetworks::initFunction()
 	return *this ;
 }
 
-Model &SocialNetworks::externalFunction( const ExternalMessage &msg )
+Model &CoupledPopulation::externalFunction( const ExternalMessage &msg )
 {
 #if VERBOSE
 	PRINT_TIMES("dext");
@@ -63,7 +63,7 @@ Model &SocialNetworks::externalFunction( const ExternalMessage &msg )
 
 }
 
-Model &SocialNetworks::internalFunction( const InternalMessage &msg )
+Model &CoupledPopulation::internalFunction( const InternalMessage &msg )
 {
 #if VERBOSE
 	PRINT_TIMES("dint");
@@ -73,7 +73,7 @@ Model &SocialNetworks::internalFunction( const InternalMessage &msg )
 	return *this;
 }
 
-Model &SocialNetworks::outputFunction( const CollectMessage &msg )
+Model &CoupledPopulation::outputFunction( const CollectMessage &msg )
 {
 	sendOutput( msg.time(), out, message ) ;
 	return *this ;

@@ -1,17 +1,17 @@
-#ifndef __SocialNetworks_H
-#define __SocialNetworks_H
+#ifndef __CoupledPopulation_H
+#define __CoupledPopulation_H
 
 #include <random>
 #include "atomic.h"  // class Atomic
 #include "VTime.h"
 
 
-#define SOCIALNET_MODEL_NAME "SocialNetworks"
+#define COUPLEDPOP_MODEL_NAME "CoupledPopulation"
 
-class SocialNetworks: public Atomic{
+class CoupledPopulation: public Atomic{
 	public:
-		SocialNetworks( const string &name = SOCIALNET_MODEL_NAME ) ;	 
-		virtual string className() const {return SOCIALNET_MODEL_NAME ;}
+		CoupledPopulation( const string &name = COUPLEDPOP_MODEL_NAME ) ;	 
+		virtual string className() const {return COUPLEDPOP_MODEL_NAME ;}
 	
 	protected:
 		Model &initFunction();	
