@@ -41,6 +41,8 @@ class Population: public Atomic{
 		Real current_fake_credibility;
 		Real current_fake_media_party;
 		Real current_fake_belief;
+
+		bool is_message_received_from_media;
 	
 		VTime sigma;
 		// Time elapsed since the last state transition until now

@@ -73,8 +73,14 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		
 	Tuple<Real> message = Tuple<Real>::from_value(msg.value());
 
-	if (message.size() > 4 && message[4] == population_id) { // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
-
+	if (
+		// mensajes a ignorar:
+		message.size() == 2 || // output "estadistico" de otra poblacion
+		(message.size() > 4 && message[4] == population_id) // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
+		){ 
+		
+		
+		this->sigma = VTime::Inf; // stays in passive state until an external event occurs;
 		holdIn( AtomicState::passive, this->sigma );
 
 	} else {
@@ -96,15 +102,10 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 			political_affinity = 0;
 		}
 
-		if(message.size() == 4) {
+		is_message_received_from_media = message.size() == 4 ;
 
-			// Generamos una transición interna para enviar el mensaje a las redes
-			holdIn( AtomicState::active, VTime::Zero );
-
-		} else { //message received from other population
-
-			holdIn( AtomicState::passive, this->sigma ); // Si no hay que volver a enviar nada hasta la proxima fake pasivamos
-		}
+		// Generamos una transición interna para enviar el mensaje a las redes
+		holdIn( AtomicState::active, VTime::Zero );
 	}
 
 	return *this ;
@@ -124,22 +125,34 @@ Model &Population::internalFunction( const InternalMessage &msg )
 Model &Population::outputFunction( const CollectMessage &msg )
 {
 
-	Tuple<Real> out_value{  current_fake_attacked_party,
-							current_fake_urgency,
-							current_fake_credibility,
-							current_fake_media_party,
-							population_id,
-							age,
-							university_studies,
-							political_involvement,
-							employment_status,
-							economic_status,
-							centrality,
-							current_fake_belief,
-							political_affinity
-						};
+	if(is_message_received_from_media) {
+		// Recibimos de Media, reenviamos a las otras poblaciones
+
+		Tuple<Real> out_value{  current_fake_attacked_party,
+					current_fake_urgency,
+					current_fake_credibility,
+					current_fake_media_party,
+					population_id,
+					age,
+					university_studies,
+					political_involvement,
+					employment_status,
+					economic_status,
+					centrality,
+					current_fake_belief,
+					political_affinity
+				};
+		sendOutput( msg.time(), out, out_value ) ;
+	}
+
+	// mandamos output "estadistico" (las otras poblaciones la van a descartar, ver externalFunction)
+	Tuple<Real> statistics{
+		population_id,	
+		political_affinity
+		};
 						
-	sendOutput( msg.time(), out, out_value ) ;
+	sendOutput( msg.time(), out, statistics ) ;
+
 	return *this ;
 }
 
