@@ -5,8 +5,8 @@ in : stop
 link : stop stop@fakenewsgenerator
 link : out@fakenewsgenerator in@mediaOfficial
 link : out@fakenewsgenerator in@mediaOpposition
-link : out@mediaOfficial in@populationscoupled
-link : out@mediaOpposition in@populationscoupled
+link : out@mediaOfficial news@populationscoupled
+link : out@mediaOpposition news@populationscoupled
 
 [fakenewsgenerator]
 frequency : 00:00:01:00
@@ -18,21 +18,21 @@ party : 1
 party : 0
 
 [populationscoupled]
-components : socialnetwork@socialnetwork population1@population population2@population population3@population population4@population 
+components : socialnetworks@socialnetworks population1@population population2@population population3@population population4@population 
 out : out_port
 in : news
 link : news in@population1
 link : news in@population2
 link : news in@population3
 link : news in@population4
-link : out@population1 in@socialnetwork
-link : out@population2 in@socialnetwork
-link : out@population3 in@socialnetwork
-link : out@population4 in@socialnetwork
-link : out@socialnetwork in@population1
-link : out@socialnetwork in@population2
-link : out@socialnetwork in@population3
-link : out@socialnetwork in@population4
+link : out@population1 in@socialnetworks
+link : out@population2 in@socialnetworks
+link : out@population3 in@socialnetworks
+link : out@population4 in@socialnetworks
+link : out@socialnetworks in@population1
+link : out@socialnetworks in@population2
+link : out@socialnetworks in@population3
+link : out@socialnetworks in@population4
 
 [population1]
 population_id : 1
