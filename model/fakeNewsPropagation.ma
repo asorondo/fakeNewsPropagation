@@ -7,6 +7,7 @@ link : out@fakenewsgenerator in@mediaOfficial
 link : out@fakenewsgenerator in@mediaOpposition
 link : out@mediaOfficial news@populationscoupled
 link : out@mediaOpposition news@populationscoupled
+link : out@populationscoupled out_port
 
 [fakenewsgenerator]
 frequency : 00:00:01:00
@@ -33,6 +34,7 @@ link : out@socialnetworks in@population1
 link : out@socialnetworks in@population2
 link : out@socialnetworks in@population3
 link : out@socialnetworks in@population4
+link : out@socialnetworks out_port
 
 [population1]
 population_id : 1
