@@ -106,6 +106,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env37
 .venv
 env/
 venv/
@@ -136,3 +137,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# CD ++
+*.dep
+src/bin/
