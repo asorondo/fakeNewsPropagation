@@ -27,6 +27,7 @@ class Population: public Atomic{
 		 const Port &in;	
 		 Port &out ;   
 
+		Real population_id;
 		Real age;
 		Real university_studies;
 		Real political_involvement;
@@ -34,6 +35,12 @@ class Population: public Atomic{
 		Real economic_status;
 		Real centrality;
 		Real political_affinity;
+
+		Real current_fake_attacked_party;
+		Real current_fake_urgency;
+		Real current_fake_credibility;
+		Real current_fake_media_party;
+		Real current_fake_belief;
 	
 		VTime sigma;
 		// Time elapsed since the last state transition until now
