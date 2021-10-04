@@ -37,7 +37,9 @@ Population::Population( const string &name ) :
 	employment_status(1),
 	economic_status(1),
 	centrality(1),
-	political_affinity(1)
+	political_affinity(1),
+	delay(1,59),
+	rng(random_device()())
 {
 	population_id = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "population_id" ) );
 	age = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "age" ) );
@@ -105,7 +107,9 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		is_message_received_from_media = message.size() == 4 ;
 
 		// Generamos una transición interna para enviar el mensaje a las redes
-		holdIn( AtomicState::active, VTime::Zero );
+		auto delay = this->delay(this->rng);
+		VTime nextChange = VTime(0,0,0,delay);
+		holdIn( AtomicState::active, nextChange );
 	}
 
 	return *this ;
@@ -117,6 +121,7 @@ Model &Population::internalFunction( const InternalMessage &msg )
 #if VERBOSE
 	PRINT_TIMES("dint");
 #endif
+
 	this->sigma = VTime::Inf; // stays in passive state until an external event occurs;
 	holdIn( AtomicState::passive, this->sigma );
 	return *this;
@@ -132,7 +137,6 @@ Model &Population::outputFunction( const CollectMessage &msg )
 					current_fake_urgency,
 					current_fake_credibility,
 					current_fake_media_party,
-					population_id,
 					age,
 					university_studies,
 					political_involvement,
@@ -140,18 +144,20 @@ Model &Population::outputFunction( const CollectMessage &msg )
 					economic_status,
 					centrality,
 					current_fake_belief,
+					population_id,
 					political_affinity
 				};
 		sendOutput( msg.time(), out, out_value ) ;
-	}
+	} else {
 
-	// mandamos output "estadistico" (las otras poblaciones la van a descartar, ver externalFunction)
-	Tuple<Real> statistics{
-		population_id,	
-		political_affinity
-		};
-						
-	sendOutput( msg.time(), out, statistics ) ;
+		// mandamos output "estadistico" (las otras poblaciones la van a descartar, ver externalFunction)
+		Tuple<Real> statistics{
+			population_id,	
+			political_affinity
+			};
+							
+		sendOutput( msg.time(), out, statistics ) ;
+	}
 
 	return *this ;
 }
@@ -182,15 +188,14 @@ Real Population::beliefInFakeFromPopulation( Tuple<Real> message )
 		Real urgency = message[1];
 		Real credibility = message[2];
 		Real media_party = message[3]; 
-
-		//message[4] es el sender_id
-		Real sender_age = message[5];
-		Real sender_university_studies = message[6];
-		Real sender_political_involvement = message[7];
-		Real sender_employment_status = message[8];
-		Real sender_economic_status = message[9];
-		Real sender_centrality = message[10];
-		Real sender_fake_belief = message[11];
+		Real sender_age = message[4];
+		Real sender_university_studies = message[5];
+		Real sender_political_involvement = message[6];
+		Real sender_employment_status = message[7];
+		Real sender_economic_status = message[8];
+		Real sender_centrality = message[9];
+		Real sender_fake_belief = message[10];
+		//message[11] es el sender_id
 		Real sender_political_affinity = message[12];
 
 		Real shared_traits_proportion = Real(1) - ((abs( (age - sender_age).value()) + 

@@ -50,6 +50,9 @@ class Population: public Atomic{
 		// Time remaining to complete the last programmed Lifetime
 		VTime timeLeft;	
 
+		std::uniform_int_distribution<int> delay;
+		std::mt19937 rng;
+
 		Real beliefInFakeFromPopulation(Tuple<Real>);
 		Real beliefInFakeFromMedia(Tuple<Real>);
 };	
