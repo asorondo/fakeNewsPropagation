@@ -7,7 +7,7 @@ link : out@fakenewsgenerator in@mediaOfficial
 link : out@fakenewsgenerator in@mediaOpposition
 link : out@mediaOfficial news@populationscoupled
 link : out@mediaOpposition news@populationscoupled
-link : out@populationscoupled out_port
+link : out_port@populationscoupled out_port
 
 [fakenewsgenerator]
 frequency : 00:00:01:00
