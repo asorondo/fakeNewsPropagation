@@ -4,6 +4,7 @@
 #include <random>
 #include "atomic.h"  // class Atomic
 #include "VTime.h"
+#include <queue>
 
 
 #define POP_MODEL_NAME "Population"
@@ -43,6 +44,8 @@ class Population: public Atomic{
 		Real current_fake_belief;
 
 		bool is_message_received_from_media;
+
+		queue<Tuple<Real>> message_queue;
 	
 		VTime sigma;
 		// Time elapsed since the last state transition until now
@@ -51,6 +54,7 @@ class Population: public Atomic{
 		VTime timeLeft;	
 
 		std::uniform_int_distribution<int> delay;
+		std::uniform_real_distribution<> dist_float; // [0,1)
 		std::mt19937 rng;
 
 		Real beliefInFakeFromPopulation(Tuple<Real>);

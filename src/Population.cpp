@@ -39,7 +39,9 @@ Population::Population( const string &name ) :
 	centrality(1),
 	political_affinity(1),
 	delay(1,59),
-	rng(random_device()())
+	rng(random_device()()),
+	is_message_received_from_media(false),
+	dist_float(0.0,1.0)
 {
 	population_id = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "population_id" ) );
 	age = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "age" ) );
@@ -48,6 +50,8 @@ Population::Population( const string &name ) :
 	employment_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "employment_status" ) );
 	economic_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "economic_status" ) );
 	centrality = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "centrality" ) );
+	political_affinity = this->dist_float(this->rng);
+	// is_message_received_from_media = false;
 }
 
 Model &Population::initFunction()
@@ -55,10 +59,12 @@ Model &Population::initFunction()
 	// [(!) Initialize common variables]
 	this->elapsed  = VTime::Zero;
  	this->timeLeft = VTime::Inf;
- 	this->sigma = VTime::Inf; // stays in active state until an external event occurs;
+ 	this->sigma = VTime::Zero; // stays in active state until an external event occurs;
  	
- 	// set next transition
- 	holdIn( AtomicState::passive, this->sigma  ) ;
+ 	int delay = this->delay(this->rng);
+	cout << "El delay en init es: " << delay << endl;
+	VTime nextChange = VTime(0,0,0,delay);
+	holdIn( AtomicState::active, nextChange );
 	return *this ;
 }
 
@@ -72,6 +78,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 	this->sigma    = nextChange();	
 	this->elapsed  = msg.time()-lastChange();	
  	this->timeLeft = this->sigma - this->elapsed; 
+	cout << "dext Sigma es " << this->sigma << " y elapsed es " << this->elapsed << endl;
 		
 	Tuple<Real> message = Tuple<Real>::from_value(msg.value());
 
@@ -82,10 +89,76 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		){ 
 		
 		
-		this->sigma = VTime::Inf; // stays in passive state until an external event occurs;
-		holdIn( AtomicState::passive, this->sigma );
+		// stays in passive state until an external event occurs;
+		// holdIn( AtomicState::passive,  VTime::Inf );
+		// passivate();
+		// holdIn( AtomicState::active,  this->timeLeft );
 
 	} else {
+
+		message_queue.push(message);
+		
+
+		// message = message_queue.front();
+		// message_queue.pop();
+
+		
+
+		// Real attacked_party = message[0];
+		// current_fake_attacked_party = message[0];
+		// current_fake_urgency = message[1];
+		// current_fake_credibility = message[2];
+		// current_fake_media_party = message[3];
+
+		// current_fake_belief = message.size() == 4 ? this->beliefInFakeFromMedia(message) : this->beliefInFakeFromPopulation(message);
+
+		// int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
+		// political_affinity = political_affinity + multiplicative_factor * current_fake_belief.value() * 0.1; // con el 0.1 nos acercamos de a poco 
+
+		// if (political_affinity > 1) {
+		// 	political_affinity = 1;
+		// } else if (political_affinity < 0) {
+		// 	political_affinity = 0;
+		// }
+
+		// is_message_received_from_media = message.size() == 4 ;
+
+		// Generamos una transición interna para enviar el mensaje a las redes
+		// int delay = this->delay(this->rng);
+		// this->timeLeft = VTime(0,0,0,delay);
+		// cout << "El delay en dext es: " << delay << endl;
+		
+	}
+	holdIn( AtomicState::active, this->timeLeft );
+
+	return *this ;
+
+}
+
+Model &Population::internalFunction( const InternalMessage &msg )
+{
+#if VERBOSE
+	PRINT_TIMES("dint");
+#endif
+	if(message_queue.empty()){
+		// stays in passive state until an external event occurs;
+		// holdIn( AtomicState::passive, VTime::Inf);
+		passivate();
+	} else {
+		// Generamos una transición interna con delay para enviar el mensaje a las redes
+		auto delay = this->delay(this->rng);
+		// VTime nextChange = VTime(0,0,0,delay);
+		holdIn( AtomicState::active, VTime(0,0,0,delay) );
+	}
+
+	return *this;
+}
+
+Model &Population::outputFunction( const CollectMessage &msg )
+{
+	if(!message_queue.empty()){
+		Tuple<Real> message = message_queue.front();
+		message_queue.pop();
 
 		Real attacked_party = message[0];
 		current_fake_attacked_party = message[0];
@@ -97,7 +170,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 
 		int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
 		political_affinity = political_affinity + multiplicative_factor * current_fake_belief.value() * 0.1; // con el 0.1 nos acercamos de a poco 
-
+	
 		if (political_affinity > 1) {
 			political_affinity = 1;
 		} else if (political_affinity < 0) {
@@ -105,30 +178,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		}
 
 		is_message_received_from_media = message.size() == 4 ;
-
-		// Generamos una transición interna para enviar el mensaje a las redes
-		auto delay = this->delay(this->rng);
-		VTime nextChange = VTime(0,0,0,delay);
-		holdIn( AtomicState::active, nextChange );
 	}
-
-	return *this ;
-
-}
-
-Model &Population::internalFunction( const InternalMessage &msg )
-{
-#if VERBOSE
-	PRINT_TIMES("dint");
-#endif
-
-	this->sigma = VTime::Inf; // stays in passive state until an external event occurs;
-	holdIn( AtomicState::passive, this->sigma );
-	return *this;
-}
-
-Model &Population::outputFunction( const CollectMessage &msg )
-{
 
 	if(is_message_received_from_media) {
 		// Recibimos de Media, reenviamos a las otras poblaciones
