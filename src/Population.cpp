@@ -50,7 +50,7 @@ Population::Population( const string &name ) :
 	employment_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "employment_status" ) );
 	economic_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "economic_status" ) );
 	centrality = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "centrality" ) );
-	political_affinity = this->dist_float(this->rng);
+	political_affinity = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "centrality" ) ); //this->dist_float(this->rng);
 	// is_message_received_from_media = false;
 }
 
@@ -59,12 +59,13 @@ Model &Population::initFunction()
 	// [(!) Initialize common variables]
 	this->elapsed  = VTime::Zero;
  	this->timeLeft = VTime::Inf;
- 	this->sigma = VTime::Zero; // stays in active state until an external event occurs;
+    int delay = this->delay(this->rng);
+	//cout << "El delay en init es: " << delay << endl;
+	//VTime nextChange = VTime(0,0,0,delay);
+ 	this->sigma = VTime(0,0,0,delay); // stays in active state until an external event occurs;
  	
- 	int delay = this->delay(this->rng);
-	cout << "El delay en init es: " << delay << endl;
-	VTime nextChange = VTime(0,0,0,delay);
-	holdIn( AtomicState::active, nextChange );
+ 	
+	holdIn( AtomicState::active, this->sigma );
 	return *this ;
 }
 
@@ -75,9 +76,10 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 #endif
 
 	//[(!) update common variables]	
-	this->sigma    = nextChange();	
-	this->elapsed  = msg.time()-lastChange();	
- 	this->timeLeft = this->sigma - this->elapsed; 
+	
+    this->sigma    = nextChange();
+	this->elapsed  = msg.time()-lastChange();
+ 	//this->timeLeft = this->sigma - this->elapsed; 
 	cout << "dext Sigma es " << this->sigma << " y elapsed es " << this->elapsed << endl;
 		
 	Tuple<Real> message = Tuple<Real>::from_value(msg.value());
@@ -88,16 +90,26 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		(message.size() > 4 && message[4] == population_id) // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
 		){ 
 		
-		
+		this->timeLeft = this-> sigma;
 		// stays in passive state until an external event occurs;
 		// holdIn( AtomicState::passive,  VTime::Inf );
 		// passivate();
 		// holdIn( AtomicState::active,  this->timeLeft );
 
 	} else {
+         message_queue.push(message);
+        if (
+            state()== 'active'
+            ){
+            this->timeLeft = this-> sigma;
+        } else {
+       
+            
+            auto delay = this->delay(this->rng);
 
-		message_queue.push(message);
-		
+            this->timeLeft = VTime(0,0,0,delay);
+        }
+    }
 
 		// message = message_queue.front();
 		// message_queue.pop();
@@ -128,7 +140,7 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 		// this->timeLeft = VTime(0,0,0,delay);
 		// cout << "El delay en dext es: " << delay << endl;
 		
-	}
+	
 	holdIn( AtomicState::active, this->timeLeft );
 
 	return *this ;
@@ -143,14 +155,14 @@ Model &Population::internalFunction( const InternalMessage &msg )
 	if(message_queue.empty()){
 		// stays in passive state until an external event occurs;
 		// holdIn( AtomicState::passive, VTime::Inf);
-		passivate();
+		this->timeLeft = VTime::Inf;
 	} else {
 		// Generamos una transición interna con delay para enviar el mensaje a las redes
 		auto delay = this->delay(this->rng);
 		// VTime nextChange = VTime(0,0,0,delay);
-		holdIn( AtomicState::active, VTime(0,0,0,delay) );
+		this->timeLeft = VTime(0,0,0,delay);
 	}
-
+       holdIn( AtomicState::active, this->timeLeft  );
 	return *this;
 }
 
@@ -208,6 +220,7 @@ Model &Population::outputFunction( const CollectMessage &msg )
 							
 		sendOutput( msg.time(), out, statistics ) ;
 	}
+    
 
 	return *this ;
 }

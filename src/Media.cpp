@@ -42,7 +42,9 @@ Media::Media( const string &name )
 	  party(0),
 	  attacked_party(1),
 	  urgency(1),
-	  credibility(1)
+	  credibility(1),
+	  delay(1,59),
+	  rng(random_device()())
 {
 	// El partido politico del medio
 	party = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "party" ) );
@@ -80,9 +82,12 @@ Model &Media::externalFunction( const ExternalMessage &msg )
 		// Partido enemigo, descreemos.
 		credibility=0;
 	}
-
+		// Generamos una transición interna con delay para enviar el mensaje a las redes
+		auto delay = this->delay(this->rng);
+		// VTime nextChange = VTime(0,0,0,delay);
+		holdIn( AtomicState::active, VTime(0,0,0,delay) );
 	// Generamos una transición interna.
-	holdIn( AtomicState::active, VTime::Zero );
+//	holdIn( AtomicState::active, VTime::Zero );
 	
 	return *this ;
 }

@@ -51,6 +51,11 @@ private:
 	VTime elapsed;
 	// Time remaining to complete the last programmed Lifetime
 	VTime timeLeft;	
+
+		std::uniform_int_distribution<int> delay;
+		std::uniform_real_distribution<> dist_float; // [0,1)
+		std::mt19937 rng;
+
 };	// class Media
 
 
