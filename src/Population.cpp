@@ -38,7 +38,7 @@ Population::Population( const string &name ) :
 	economic_status(1),
 	centrality(1),
 	political_affinity(1),
-	delay(1,59),
+	delay(1,999), // milisegundos
 	rng(random_device()()),
 	is_message_received_from_media(false),
 	dist_float(0.0,1.0)
@@ -59,11 +59,10 @@ Model &Population::initFunction()
 	// [(!) Initialize common variables]
 	this->elapsed  = VTime::Zero;
  	this->timeLeft = VTime::Inf;
+
+	// seteamos un delay para que escupa el output inicial
     int delay = this->delay(this->rng);
-	//cout << "El delay en init es: " << delay << endl;
-	//VTime nextChange = VTime(0,0,0,delay);
- 	this->sigma = VTime(0,0,0,delay); // stays in active state until an external event occurs;
- 	
+ 	this->sigma = VTime(0,0,0,delay);
  	
 	holdIn( AtomicState::active, this->sigma );
 	return *this ;
@@ -74,74 +73,21 @@ Model &Population::externalFunction( const ExternalMessage &msg )
 #if VERBOSE
 	PRINT_TIMES("dext");
 #endif
-
-	//[(!) update common variables]	
-	
-    this->sigma    = nextChange();
-	this->elapsed  = msg.time()-lastChange();
- 	//this->timeLeft = this->sigma - this->elapsed; 
-	cout << "dext Sigma es " << this->sigma << " y elapsed es " << this->elapsed << endl;
 		
 	Tuple<Real> message = Tuple<Real>::from_value(msg.value());
 
-	if (
-		// mensajes a ignorar:
-		message.size() == 2 || // output "estadistico" de otra poblacion
-		(message.size() > 4 && message[4] == population_id) // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
-		){ 
-		
-		this->timeLeft = this-> sigma;
-		// stays in passive state until an external event occurs;
-		// holdIn( AtomicState::passive,  VTime::Inf );
-		// passivate();
-		// holdIn( AtomicState::active,  this->timeLeft );
-
-	} else {
-         message_queue.push(message);
-        if (
-            state()== 'active'
-            ){
-            this->timeLeft = this-> sigma;
-        } else {
-       
-            
-            auto delay = this->delay(this->rng);
-
-            this->timeLeft = VTime(0,0,0,delay);
-        }
+	// si no es un mensaje a ignorar, encolamos la fake new.
+	if (!(message.size() == 2 || // output "estadistico" de otra poblacion
+		(message.size() > 11 && message[11] == population_id) // el mensaje es de la misma poblacion, c++ tiene evaluacion por cortocircuito asi que no explota :) 
+	)){ 
+        message_queue.push(message);
+		/* Nos agendamos una transicion interna con cierto delay.
+		   Nota: esto puede llegar a "pisar" un delay previo si el atomico se encontraba
+		   procesando una fake new anterior, pero no importa.
+		 */
+		int delay = this->delay(this->rng);
+		holdIn( AtomicState::active, VTime(0,0,0,delay));
     }
-
-		// message = message_queue.front();
-		// message_queue.pop();
-
-		
-
-		// Real attacked_party = message[0];
-		// current_fake_attacked_party = message[0];
-		// current_fake_urgency = message[1];
-		// current_fake_credibility = message[2];
-		// current_fake_media_party = message[3];
-
-		// current_fake_belief = message.size() == 4 ? this->beliefInFakeFromMedia(message) : this->beliefInFakeFromPopulation(message);
-
-		// int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
-		// political_affinity = political_affinity + multiplicative_factor * current_fake_belief.value() * 0.1; // con el 0.1 nos acercamos de a poco 
-
-		// if (political_affinity > 1) {
-		// 	political_affinity = 1;
-		// } else if (political_affinity < 0) {
-		// 	political_affinity = 0;
-		// }
-
-		// is_message_received_from_media = message.size() == 4 ;
-
-		// Generamos una transición interna para enviar el mensaje a las redes
-		// int delay = this->delay(this->rng);
-		// this->timeLeft = VTime(0,0,0,delay);
-		// cout << "El delay en dext es: " << delay << endl;
-		
-	
-	holdIn( AtomicState::active, this->timeLeft );
 
 	return *this ;
 
@@ -154,15 +100,12 @@ Model &Population::internalFunction( const InternalMessage &msg )
 #endif
 	if(message_queue.empty()){
 		// stays in passive state until an external event occurs;
-		// holdIn( AtomicState::passive, VTime::Inf);
-		this->timeLeft = VTime::Inf;
+		passivate();
 	} else {
 		// Generamos una transición interna con delay para enviar el mensaje a las redes
 		auto delay = this->delay(this->rng);
-		// VTime nextChange = VTime(0,0,0,delay);
-		this->timeLeft = VTime(0,0,0,delay);
+		holdIn( AtomicState::active, VTime(0,0,0,delay) );
 	}
-       holdIn( AtomicState::active, this->timeLeft  );
 	return *this;
 }
 
