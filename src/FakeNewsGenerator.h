@@ -40,7 +40,8 @@ private:
 	const Port &stop;
 	Port &out ;
 	VTime preparationTime;
-
+    float dist;
+    
 	std::uniform_int_distribution<int> dist_int; // 0 ò 1
 	std::uniform_real_distribution<> dist_float; // [0,1)
     std::mt19937 rng;
