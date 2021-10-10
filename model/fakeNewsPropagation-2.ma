@@ -11,7 +11,7 @@ link : out_port@populationscoupled out_port
 
 [fakenewsgenerator]
 frequency : 00:15:00:00
-dist: 0.2
+dist: 0.4
 
 [mediaOfficial]
 party : 1

@@ -11,7 +11,7 @@ link : out_port@populationscoupled out_port
 
 [fakenewsgenerator]
 frequency : 00:15:00:00
-dist: 0.2
+dist: 0.4
 
 [mediaOfficial]
 party : 1
@@ -64,9 +64,9 @@ political_affinity: 0.1
 [population2]
 population_id : 2
 age : 35
-university_studies : 1
-political_involvement : 0.6
-employment_status : 0.6
+university_studies : 0
+political_involvement : 0.3
+employment_status : 0.2
 economic_status : 0.2
 centrality : 0.6
 political_affinity: 0.7
@@ -95,10 +95,10 @@ political_affinity: 0.1
 [population5]
 population_id : 5
 age : 20
-university_studies : 1
-political_involvement : 0.7
+university_studies : 0
+political_involvement : 0.3
 employment_status : 0.3
-economic_status : 0.4
+economic_status : 0.85
 centrality : 0.8
 political_affinity: 0
 
@@ -108,8 +108,8 @@ population_id : 6
 age : 40
 university_studies : 0
 political_involvement : 0.3
-employment_status : 0.4
-economic_status : 0.78
+employment_status : 0.35
+economic_status : 0.82
 centrality : 0.3
 political_affinity:0.3
 
@@ -128,7 +128,7 @@ population_id : 8
 age : 65
 university_studies : 0
 political_involvement : 0.2
-employment_status : 0.55
-economic_status : 0.6
+employment_status : 0.25
+economic_status : 0.15
 centrality : 0.4
 political_affinity: 0.55
