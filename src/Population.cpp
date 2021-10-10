@@ -50,7 +50,7 @@ Population::Population( const string &name ) :
 	employment_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "employment_status" ) );
 	economic_status = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "economic_status" ) );
 	centrality = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "centrality" ) );
-	political_affinity = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "centrality" ) ); //this->dist_float(this->rng);
+	political_affinity = str2Real( ParallelMainSimulator::Instance().getParameter( description(), "political_affinity" ) ); //this->dist_float(this->rng);
 	// is_message_received_from_media = false;
 }
 
@@ -124,7 +124,7 @@ Model &Population::outputFunction( const CollectMessage &msg )
 		current_fake_belief = message.size() == 4 ? this->beliefInFakeFromMedia(message) : this->beliefInFakeFromPopulation(message);
 
 		int multiplicative_factor = attacked_party == 1 ? 1 : (-1); // para saber si restar o sumar -> acercarse al partido 0 o 1
-		political_affinity = political_affinity + multiplicative_factor * current_fake_belief.value() * 0.1; // con el 0.1 nos acercamos de a poco 
+		political_affinity = political_affinity + multiplicative_factor * current_fake_belief.value() * 0.0175; // con el 0.01 nos acercamos de a poco 
 	
 		if (political_affinity > 1) {
 			political_affinity = 1;
@@ -175,14 +175,14 @@ Real Population::beliefInFakeFromMedia( Tuple<Real> message )
 		Real credibility = message[2];
 		Real media_party = message[3];
 
-		Real belief =    (Real(1) - abs( (media_party - political_affinity).value() ) ) * 0.125   + // cuanto mas valga abs es que mas diferencia de afinidades hay - > menos va a creer
+		Real belief =    (Real(1) - abs( (media_party - political_affinity).value() ) ) * 0.175   + // cuanto mas valga abs es que mas diferencia de afinidades hay - > menos va a creer
 					(Real(1) - university_studies) * 0.125 +
 					(Real(1) - abs( (economic_status - 0.5).value() )) * 0.125 + // 0.5 porque si esta en un extremo va a tener de esta forma un valor mayor
 					(Real(1) - employment_status) * 0.125 +
 					(Real(1) - political_involvement) * 0.125 +
-					abs( (attacked_party - political_affinity).value() ) * 0.125 +
-					urgency * 0.125 +
-					credibility * 0.125;
+					abs( (attacked_party - political_affinity).value() ) * 0.175 +
+					urgency * 0.1 +
+					credibility * 0.05;
 		
 		return belief; 
 
@@ -210,10 +210,10 @@ Real Population::beliefInFakeFromPopulation( Tuple<Real> message )
 										abs((employment_status - employment_status).value()) +
 										abs((economic_status - sender_economic_status).value())) / 5); // dividi por 5 porque cada termino puede valer entre 0 y 1
 
-		Real belief =   sender_fake_belief * 0.25 +
-						shared_traits_proportion * 0.25 +
+		Real belief =   (sender_fake_belief * 0.125 +
+						shared_traits_proportion * 0.125 +
 						sender_centrality * 0.25 +
-						(Real(1) - abs((political_affinity - sender_political_affinity).value()) ) * 0.25;
+						(Real(1) - abs((political_affinity - sender_political_affinity).value()) ) * 0.5)*0.5;
 
 		return belief; 
 }
